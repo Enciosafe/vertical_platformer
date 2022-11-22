@@ -46,16 +46,16 @@ floorCollisions2D.forEach((row, y) => {
 const gravity = 0.5
 
 
-
-
 const player = new Player({
-    x: 0,
-    y: 0,
+    position: {
+        x: 100,
+        y: 0,
+    },
+    collisionBlocks,
+    imageSrc: './img/warrior/Idle.png',
+    frameRate: 8,
 })
-const player2 = new Player({
-    x: 200,
-    y: 0,
-})
+
 
 const keys = {
     d: {
@@ -89,16 +89,13 @@ function animate () {
     collisionPlatforms.forEach(collisionBlocks => {
         collisionBlocks.update()
     })
-    c.restore()
-
-
 
     player.update()
-    player2.update()
-
     player.velocity.x = 0
     if (keys.d.pressed) player.velocity.x = 5
     else if (keys.a.pressed) player.velocity.x = -5
+
+    c.restore()
 }
 
 animate()
@@ -112,7 +109,7 @@ window.addEventListener('keydown', (event) => {
             keys.a.pressed = true
             break
         case 'w':
-            player.velocity.y = -20
+            player.velocity.y = -8
             break
     }
 })
