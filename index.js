@@ -18,14 +18,17 @@ for (let i=0; i < platformCollisions.length; i += 36) {
     platformCollisions2D.push(platformCollisions.slice(i, i  + 36))
 }
 
-const collisionPlatforms = []
+const platformCollisionBlocks = []
 platformCollisions2D.forEach((row, y) => {
     row.forEach((symbol, x) => {
         if(symbol === 202) {
-            collisionPlatforms.push(new CollisionBlock({position : {
+            platformCollisionBlocks.push(new CollisionBlock({
+                position : {
                     x: x * 16,
                     y: y * 16,
-                }}))
+                },
+                height: 4
+            }))
         }
     })
 })
@@ -43,7 +46,7 @@ floorCollisions2D.forEach((row, y) => {
 })
 
 
-const gravity = 0.5
+const gravity = 0.1
 
 
 const player = new Player({
@@ -52,8 +55,51 @@ const player = new Player({
         y: 300,
     },
     collisionBlocks,
+    platformCollisionBlocks,
     imageSrc: './img/warrior/Idle.png',
     frameRate: 8,
+    animations: {
+        Idle: {
+            imageSrc: './img/warrior/Idle.png',
+            frameRate: 8,
+            frameBuffer: 3,
+        },
+        IdleLeft: {
+            imageSrc: './img/warrior/IdleLeft.png',
+            frameRate: 8,
+            frameBuffer: 3,
+        },
+        Run: {
+            imageSrc: './img/warrior/Run.png',
+            frameRate: 8,
+            frameBuffer: 5
+        },
+        RunLeft: {
+            imageSrc: './img/warrior/RunLeft.png',
+            frameRate: 8,
+            frameBuffer: 5
+        },
+        Jump: {
+            imageSrc: './img/warrior/Jump.png',
+            frameRate: 2,
+            frameBuffer: 3
+        },
+        JumpLeft: {
+            imageSrc: './img/warrior/JumpLeft.png',
+            frameRate: 2,
+            frameBuffer: 3
+        },
+        Fall: {
+            imageSrc: './img/warrior/Fall.png',
+            frameRate: 2,
+            frameBuffer: 3
+        },
+        FallLeft: {
+            imageSrc: './img/warrior/FallLeft.png',
+            frameRate: 2,
+            frameBuffer: 3
+        },
+    }
 })
 
 
@@ -86,14 +132,33 @@ function animate () {
     collisionBlocks.forEach(collisionBlocks => {
         collisionBlocks.update()
     })
-    collisionPlatforms.forEach(collisionBlocks => {
+    platformCollisionBlocks.forEach(collisionBlocks => {
         collisionBlocks.update()
     })
 
     player.update()
     player.velocity.x = 0
-    if (keys.d.pressed) player.velocity.x = 5
-    else if (keys.a.pressed) player.velocity.x = -5
+    if (keys.d.pressed) {
+        player.switchSprite('Run')
+        player.velocity.x = 2
+        player.lastDirection = 'right'
+    }
+    else if (keys.a.pressed) {
+        player.switchSprite('RunLeft')
+        player.velocity.x = -2
+        player.lastDirection = 'left'
+    }
+    else if (player.velocity.y === 0) {
+        if (player.lastDirection === 'right') player.switchSprite('Idle')
+        else player.switchSprite('IdleLeft')
+    }
+
+    if (player.velocity.y < 0 && player.lastDirection === 'right') player.switchSprite('Jump')
+        else if (player.velocity.y < 0 && player.lastDirection === 'left') player.switchSprite('JumpLeft')
+    else if (player.velocity.y > 0) {
+        if (player.lastDirection === 'right') player.switchSprite('Fall')
+        else player.switchSprite('FallLeft')
+    }
 
     c.restore()
 }
@@ -109,7 +174,7 @@ window.addEventListener('keydown', (event) => {
             keys.a.pressed = true
             break
         case 'w':
-            player.velocity.y = -8
+            player.velocity.y = -3.5
             break
     }
 })
